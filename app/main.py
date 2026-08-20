@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.routers.analysis import router as analysis_router
+from app.schemas import HealthResponse
 
 
 @asynccontextmanager
@@ -33,6 +34,6 @@ app.add_middleware(
 app.include_router(analysis_router)
 
 
-@app.get("/health", tags=["system"], operation_id="healthCheck")
-async def health() -> dict[str, str]:
+@app.get("/health", tags=["system"], operation_id="healthCheck", response_model=HealthResponse)
+async def health() -> HealthResponse:
     return {"status": "ok", "service": settings.app_name}
