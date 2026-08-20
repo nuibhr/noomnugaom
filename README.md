@@ -20,7 +20,7 @@ The Action routes use an `X-API-Key` header. Health remains public for the deplo
 
 | Need | Default source | Status |
 | --- | --- | --- |
-| Thai and US OHLCV | Yahoo Finance via `yfinance` | Free but unofficial; can be delayed and incomplete |
+| Thai and US OHLCV | Yahoo Finance via `yfinance` | Free but unofficial; can be delayed, incomplete, or rate-limited |
 | US filings | SEC EDGAR `data.sec.gov` | Official, free, requires a descriptive User-Agent |
 | Thai filings | SET and SEC Thailand | Recommended verification sources; not mass-scraped by this service |
 | GoogleFinance | Google Sheets formula | Suitable for manual spreadsheet use; not used as a backend feed because historical `GOOGLEFINANCE` values cannot be accessed via Sheets API/Apps Script |

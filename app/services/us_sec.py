@@ -3,6 +3,7 @@ from __future__ import annotations
 import httpx
 
 from app.schemas import FundamentalMetric, Fundamentals
+from app.services.market import ProviderUnavailableError
 
 
 class SecProvider:
@@ -16,9 +17,12 @@ class SecProvider:
         self.headers = {"User-Agent": user_agent, "Accept-Encoding": "gzip, deflate"}
 
     def _get_json(self, url: str) -> dict:
-        response = httpx.get(url, headers=self.headers, timeout=20.0)
-        response.raise_for_status()
-        return response.json()
+        try:
+            response = httpx.get(url, headers=self.headers, timeout=20.0)
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPError as exc:
+            raise ProviderUnavailableError("SEC EDGAR is temporarily unavailable; retry later") from exc
 
     def _cik_for_ticker(self, ticker: str) -> str:
         mapping = self._get_json("https://www.sec.gov/files/company_tickers.json")
@@ -58,4 +62,3 @@ class SecProvider:
             total_debt=self._latest_metric(facts, ["LongTermDebtCurrent", "LongTermDebtAndFinanceLeaseObligationsCurrent"]),
             note="Latest reported US-GAAP fact from SEC 10-Q/10-K filings; values may use different fiscal periods.",
         )
-

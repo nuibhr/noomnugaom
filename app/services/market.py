@@ -14,6 +14,10 @@ class DataUnavailableError(RuntimeError):
     pass
 
 
+class ProviderUnavailableError(DataUnavailableError):
+    pass
+
+
 @dataclass
 class MarketHistory:
     frame: pd.DataFrame
@@ -46,7 +50,12 @@ class YahooMarketProvider:
 
     def _download(self, symbol: str, market: Market, provider_symbol: str, period: str, interval: str) -> MarketHistory:
         ticker = yf.Ticker(provider_symbol)
-        frame = ticker.history(period=period, interval=interval, auto_adjust=False, actions=False)
+        try:
+            frame = ticker.history(period=period, interval=interval, auto_adjust=False, actions=False)
+        except Exception as exc:
+            raise ProviderUnavailableError(
+                f"Market data provider is temporarily unavailable for {provider_symbol}; retry later"
+            ) from exc
         if frame.empty or "Close" not in frame:
             raise DataUnavailableError(f"No market data returned for {provider_symbol}")
 
@@ -78,4 +87,3 @@ class YahooMarketProvider:
             source_notice=self.source_notice,
         )
         return MarketHistory(frame=frame, snapshot=snapshot)
-

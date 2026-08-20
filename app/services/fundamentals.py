@@ -7,7 +7,7 @@ import yfinance as yf
 
 from app.schemas import FundamentalMetric, Fundamentals, Market
 from app.services.cache import TTLCache
-from app.services.market import DataUnavailableError, YahooMarketProvider
+from app.services.market import DataUnavailableError, ProviderUnavailableError, YahooMarketProvider
 
 
 def _value_at(frame: pd.DataFrame, labels: list[str], column: object) -> float | None:
@@ -54,14 +54,16 @@ class YahooFundamentalProvider:
         return self.cache.get_or_set(provider_symbol, lambda: self._download(provider_symbol))
 
     def _download(self, provider_symbol: str) -> Fundamentals:
-        ticker = yf.Ticker(provider_symbol)
-        income = ticker.quarterly_income_stmt
-        balance = ticker.quarterly_balance_sheet
-        cashflow = ticker.quarterly_cashflow
         try:
+            ticker = yf.Ticker(provider_symbol)
+            income = ticker.quarterly_income_stmt
+            balance = ticker.quarterly_balance_sheet
+            cashflow = ticker.quarterly_cashflow
             currency = ticker.fast_info.get("currency")
-        except Exception:  # External sources may omit fast_info fields.
-            currency = None
+        except Exception as exc:
+            raise ProviderUnavailableError(
+                f"Fundamental data provider is temporarily unavailable for {provider_symbol}; retry later"
+            ) from exc
         if income.empty and balance.empty and cashflow.empty:
             raise DataUnavailableError(f"No fundamental data returned for {provider_symbol}")
         return Fundamentals(
@@ -78,4 +80,3 @@ class YahooFundamentalProvider:
                 "For Thai issuers, verify against SET and SEC Thailand filings."
             ),
         )
-

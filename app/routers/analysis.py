@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app.config import settings
 from app.schemas import AnalysisResponse, ChatContextResponse, Fundamentals, Market
 from app.services.fundamentals import YahooFundamentalProvider
-from app.services.market import DataUnavailableError, YahooMarketProvider
+from app.services.market import DataUnavailableError, ProviderUnavailableError, YahooMarketProvider
 from app.services.technical import analyse_technical
 from app.services.us_sec import SecProvider
 from app.security import require_action_api_key
@@ -25,6 +25,8 @@ ALLOWED_INTERVALS = {"1d", "1wk"}
 async def _analysis(symbol: str, market: Market, period: str, interval: str):
     try:
         history = await asyncio.to_thread(market_provider.fetch_history, symbol, market, period, interval)
+    except ProviderUnavailableError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     except (DataUnavailableError, ValueError) as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     technical = analyse_technical(history.frame, interval)
@@ -63,6 +65,8 @@ async def get_fundamentals(
                 raise HTTPException(status_code=400, detail="Set SEC_USER_AGENT to enable official SEC filings")
             return await asyncio.to_thread(SecProvider(settings.sec_user_agent).fetch, symbol)
         return await asyncio.to_thread(fundamental_provider.fetch, symbol, market)
+    except ProviderUnavailableError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     except (DataUnavailableError, LookupError, ValueError, OSError) as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
