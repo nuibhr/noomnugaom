@@ -10,6 +10,12 @@ FastAPI backend for a stock-analysis chatbot. It returns price metadata, support
 - `GET /v1/chat-context/{symbol}` — a master system prompt plus structured analysis for an LLM/chat UI.
 - `GET /health` — service liveness check.
 
+## GPT Action and production deployment
+
+The FastAPI schema is exposed at `/openapi.json`. A ready-to-edit Action schema and setup guide live in [`docs/`](docs/). Before public deployment, use a **new** `ACTION_API_KEY`, set `APP_ENV=production`, and configure `PUBLIC_BASE_URL` to the final HTTPS URL. Production startup fails if the action key is missing.
+
+The Action routes use an `X-API-Key` header. Health remains public for the deployment platform. The production secret belongs only in the host's encrypted environment-variable store and the GPT Action authentication setting.
+
 ## Data-source policy
 
 | Need | Default source | Status |
@@ -45,6 +51,8 @@ To enable the official SEC adapter, set a transparent contact User-Agent:
 ```bash
 export SEC_USER_AGENT='NoomNugaom/0.1 your-email@example.com'
 ```
+
+See [`docs/gpt-action-setup.md`](docs/gpt-action-setup.md) after deployment.
 
 ## Run with Docker
 

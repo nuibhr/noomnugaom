@@ -1,0 +1,76 @@
+openapi: 3.1.0
+info:
+  title: Noom Nugaom Stock Analyst API
+  version: 0.1.0
+  description: Read-only stock-analysis data. It is educational information, not investment advice.
+servers:
+  - url: https://REPLACE_WITH_YOUR_PUBLIC_HTTPS_URL
+    description: Replace this placeholder after deployment.
+components:
+  securitySchemes:
+    ActionApiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  schemas:
+    Market:
+      type: string
+      enum: [TH, US]
+security:
+  - ActionApiKey: []
+paths:
+  /v1/analysis/{symbol}:
+    get:
+      operationId: getStockAnalysis
+      summary: Get price metadata and technical analysis for a stock.
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema: { type: string }
+          description: SET symbol such as PTT or US ticker such as AAPL.
+        - name: market
+          in: query
+          schema: { $ref: '#/components/schemas/Market', default: TH }
+        - name: period
+          in: query
+          schema: { type: string, enum: [1mo, 3mo, 6mo, 1y, 2y, 5y], default: 1y }
+        - name: interval
+          in: query
+          schema: { type: string, enum: [1d, 1wk], default: 1d }
+      responses:
+        '200': { description: Price, technical levels, indicators, and data-source metadata. }
+  /v1/fundamentals/{symbol}:
+    get:
+      operationId: getStockFundamentals
+      summary: Get latest available fundamental metrics for a stock.
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema: { type: string }
+        - name: market
+          in: query
+          schema: { $ref: '#/components/schemas/Market', default: TH }
+        - name: provider
+          in: query
+          schema: { type: string, enum: [auto, yahoo, sec], default: auto }
+      responses:
+        '200': { description: Latest reported fundamental data and source metadata. }
+  /v1/chat-context/{symbol}:
+    get:
+      operationId: getStockChatContext
+      summary: Get a complete data context for stock-analysis conversation.
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema: { type: string }
+        - name: market
+          in: query
+          schema: { $ref: '#/components/schemas/Market', default: TH }
+        - name: include_fundamentals
+          in: query
+          schema: { type: boolean, default: true }
+      responses:
+        '200': { description: System prompt plus market, technical, and optional fundamental data. }

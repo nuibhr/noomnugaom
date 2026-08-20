@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.config import settings
 from app.schemas import AnalysisResponse, ChatContextResponse, Fundamentals, Market
@@ -13,8 +13,9 @@ from app.services.fundamentals import YahooFundamentalProvider
 from app.services.market import DataUnavailableError, YahooMarketProvider
 from app.services.technical import analyse_technical
 from app.services.us_sec import SecProvider
+from app.security import require_action_api_key
 
-router = APIRouter(prefix="/v1", tags=["analysis"])
+router = APIRouter(prefix="/v1", tags=["analysis"], dependencies=[Depends(require_action_api_key)])
 market_provider = YahooMarketProvider(settings.cache_ttl_seconds)
 fundamental_provider = YahooFundamentalProvider()
 ALLOWED_PERIODS = {"1mo", "3mo", "6mo", "1y", "2y", "5y"}
@@ -87,4 +88,3 @@ async def get_chat_context(
         fundamentals=fundamentals,
         generated_at=datetime.now(timezone.utc),
     )
-
