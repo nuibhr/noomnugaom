@@ -33,7 +33,7 @@ async def _analysis(symbol: str, market: Market, period: str, interval: str):
     return history.snapshot, technical
 
 
-@router.get("/analysis/{symbol}", response_model=AnalysisResponse)
+@router.get("/analysis/{symbol}", response_model=AnalysisResponse, operation_id="getStockAnalysis")
 async def get_analysis(
     symbol: str,
     market: Market = Query("TH"),
@@ -51,7 +51,7 @@ async def get_analysis(
     )
 
 
-@router.get("/fundamentals/{symbol}", response_model=Fundamentals)
+@router.get("/fundamentals/{symbol}", response_model=Fundamentals, operation_id="getFundamentals")
 async def get_fundamentals(
     symbol: str,
     market: Market = Query("TH"),
@@ -71,7 +71,7 @@ async def get_fundamentals(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.get("/chat-context/{symbol}", response_model=ChatContextResponse)
+@router.get("/chat-context/{symbol}", response_model=ChatContextResponse, operation_id="getChatContext")
 async def get_chat_context(
     symbol: str,
     market: Market = Query("TH"),
