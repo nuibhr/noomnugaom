@@ -8,6 +8,11 @@ from pydantic import BaseModel, Field
 Market = Literal["TH", "US"]
 
 
+class HealthResponse(BaseModel):
+    status: Literal["ok"]
+    service: str
+
+
 class PriceSnapshot(BaseModel):
     symbol: str
     provider_symbol: str
@@ -77,4 +82,3 @@ class ChatContextResponse(BaseModel):
     technical_analysis: TechnicalAnalysis
     fundamentals: Fundamentals | None = None
     generated_at: datetime
-
