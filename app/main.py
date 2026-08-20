@@ -33,6 +33,6 @@ app.add_middleware(
 app.include_router(analysis_router)
 
 
-@app.get("/health", tags=["system"])
+@app.get("/health", tags=["system"], operation_id="healthCheck")
 async def health() -> dict[str, str]:
     return {"status": "ok", "service": settings.app_name}
