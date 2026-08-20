@@ -61,6 +61,10 @@ cp .env.example .env
 docker compose up --build
 ```
 
+## Deploy on Vercel
+
+The repository includes `api/index.py` as the Vercel Function entrypoint and `vercel.json` rewrites all API paths to FastAPI. Set `APP_ENV=production`, `PUBLIC_BASE_URL`, and a new `ACTION_API_KEY` in Vercel before production deployment.
+
 ## Production notes
 
 - Replace the in-memory cache with Redis before using multiple replicas.
